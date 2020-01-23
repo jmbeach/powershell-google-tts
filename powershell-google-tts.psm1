@@ -1,10 +1,14 @@
 $baseUrl = 'https://texttospeech.googleapis.com/v1/';
 
 # requires ffplay (can be installed from ffmpeg)
-function Start-GoogleTTS ($text) {
+function Start-GoogleTTS ($text, $speed) {
     $data = [psobject]::new()
     $audioConfig = [psobject]::new();
     $audioConfig | Add-Member -NotePropertyName 'audioEncoding' -NotePropertyValue 'MP3';
+    if ($null -ne $speed) {
+        $audioConfig | Add-Member -NotePropertyName 'speakingRate' -NotePropertyValue $speed
+    }
+
     $input = [psobject]::new();
     $input | Add-Member -NotePropertyName 'text' -NotePropertyValue $text;
     $voice = [psobject]::new();

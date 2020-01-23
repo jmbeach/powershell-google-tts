@@ -1,6 +1,6 @@
 @{
     RootModule = '.\powershell-google-tts.psm1';
-    ModuleVersion = '1.0.0';
+    ModuleVersion = '1.0.1';
     GUID = '2f2286d7-ef6c-4bc8-9a64-03bb81ae9af5';
     Author = 'Jared Beach';
     CompanyName = 'Unknown';
