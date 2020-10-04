@@ -17,5 +17,5 @@ Then, in Powershell, run `Start-GoogleTTS 'your text here'`
 ## Speak Text From File
 
 ```
-Start-GoogleTTS $(cat .\example.txt).ToString()
+Start-GoogleTTS $(cat .\example.txt | Out-String)
 ```
