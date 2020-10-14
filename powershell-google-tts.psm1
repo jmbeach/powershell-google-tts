@@ -1,13 +1,17 @@
 $baseUrl = 'https://texttospeech.googleapis.com/v1/';
 
 # requires ffplay (can be installed from ffmpeg)
-function Start-GoogleTTS ($text, $speed, $outFile) {
+function Start-GoogleTTS ($text, $speed, $outFile, $voiceName) {
     $text = $text.Replace('“', "").Replace('”', "");
     $data = [psobject]::new()
     $audioConfig = [psobject]::new();
     $audioConfig | Add-Member -NotePropertyName 'audioEncoding' -NotePropertyValue 'MP3';
     if ($null -ne $speed) {
         $audioConfig | Add-Member -NotePropertyName 'speakingRate' -NotePropertyValue $speed
+    }
+
+    if ($null -eq $voiceName) {
+        $voiceName = 'en-US-Standard-C';
     }
 
     $i = 0;
@@ -19,7 +23,7 @@ function Start-GoogleTTS ($text, $speed, $outFile) {
     $input | Add-Member -NotePropertyName 'text' -NotePropertyValue $null;
     $voice = [psobject]::new();
     $voice | Add-Member -NotePropertyName 'languageCode' -NotePropertyValue 'en-US';
-    $voice | Add-Member -NotePropertyName 'name' -NotePropertyValue 'en-US-Standard-C';
+    $voice | Add-Member -NotePropertyName 'name' -NotePropertyValue $voiceName;
     $data | Add-Member -NotePropertyName 'audioConfig' -NotePropertyValue $audioConfig;
     $data | Add-Member -NotePropertyName 'input' -NotePropertyValue $input;
     $data | Add-Member -NotePropertyName 'voice' -NotePropertyValue $voice;
