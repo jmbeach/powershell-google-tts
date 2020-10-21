@@ -1,5 +1,19 @@
 $baseUrl = 'https://texttospeech.googleapis.com/v1/';
 
+function Get-GoogleTTSVoices() {
+  return Invoke-WebRequest -Uri ($baseUrl + 'voices?key=' + $env:GOOGLE_API_KEY_TTS) -ContentType 'application/json' -Method GET | ConvertFrom-Json;
+}
+
+$completer = {
+  param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
+  $upper = $wordToComplete.ToUpper()
+  (Get-GoogleTTSVoices).voices.name | Where-Object {
+      $_.ToUpper() -like "$upper*"
+  } | ForEach-Object {
+      $_;
+  }
+}
+
 # requires ffplay (can be installed from ffmpeg)
 function Start-GoogleTTS ($text, $speed, $outFile, $voiceName) {
     $text = $text.Replace('“', "").Replace('”', "");
@@ -72,3 +86,5 @@ function Start-GoogleTTS ($text, $speed, $outFile, $voiceName) {
         Remove-Item concat.txt -Force
     }
 }
+
+Register-ArgumentCompleter -CommandName Start-GoogleTTS -ParameterName voiceName -ScriptBlock $completer;
