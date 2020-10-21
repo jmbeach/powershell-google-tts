@@ -38,7 +38,12 @@ function Start-GoogleTTS ($text, $speed, $outFile, $voiceName) {
         $response = Invoke-WebRequest -Uri ($baseUrl + 'text:synthesize?key=' + $env:GOOGLE_API_KEY_TTS) -ContentType 'application/json' -Body (ConvertTo-Json $data) -Method POST;
         $audioData = $response.Content | ConvertFrom-Json;
         $base64 = [System.Convert]::FromBase64String($audioData.audioContent);
-        $tmpFile = $env:TEMP + "\" + [System.DateTime]::Now.ToSTring('yyyy-MM-dd-hh-mm-ss-ff') + ".mp3";
+        $tempPath = $env:TEMP;
+        if ($null -eq $tempPath) {
+          $tempPath = "/tmp";
+        }
+
+        $tmpFile = "$tempPath/$([System.DateTime]::Now.ToSTring('yyyy-MM-dd-hh-mm-ss-ff')).mp3";
         $writeFile = "$outFile.$i";
         if ($useTemp) {
             $writeFile = $tmpFile;
@@ -46,7 +51,7 @@ function Start-GoogleTTS ($text, $speed, $outFile, $voiceName) {
 
         [System.IO.File]::WriteAllBytes($writeFile, $base64);
         if ($useTemp) {
-            ffplay.exe -nodisp -autoexit -hide_banner -loglevel panic $writeFile > $null;
+            ffplay -nodisp -autoexit -hide_banner -loglevel panic $writeFile > $null;
             Remove-Item $writeFile -Force;
         }
         else {
