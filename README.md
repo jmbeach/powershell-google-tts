@@ -10,7 +10,9 @@ Install-Module -Name powershell-google-tts
 
 Add an environment variable `GOOGLE_API_KEY_TTS` and set the value to a valid API key.
 
-Then, in Powershell, run `Start-GoogleTTS 'your text here'`
+Then, in Powershell, run `Start-GoogleTTS 'your text here'`.
+
+If the text exceeds Google's maximum input, it automatically splits up the text into multiple requests and concatenates the audio output.
 
 # Usage
 
