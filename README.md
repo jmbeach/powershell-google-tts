@@ -12,10 +12,20 @@ Add an environment variable `GOOGLE_API_KEY_TTS` and set the value to a valid AP
 
 Then, in Powershell, run `Start-GoogleTTS 'your text here'`
 
+# Usage
+
+```powershell
+Start-GoogleTTS
+  [-text] <string>      # The text to speak
+  [-speed] <number>     # Optional speed of the speech (defaults to 1)
+  [-outFile] <string>   # Optional path to save mp3 file of the TTS audio
+  [-voiceName] <string> # Optional voice name - autocompletes (defaults to en-US-Standard-C)
+```
+
 # Examples
 
 ## Speak Text From File
 
 ```
-Start-GoogleTTS $(cat .\example.txt | Out-String)
+Start-GoogleTTS $(cat ./example.txt | Out-String)
 ```
