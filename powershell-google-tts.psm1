@@ -23,6 +23,11 @@ function Start-GoogleTTS ($text, $speed, $outFile, $voiceName) {
   if ($null -eq $env:GOOGLE_API_KEY_TTS) {
     throw 'You must set the GOOGLE_API_KEY_TTS environment variable to use GoogleTTS.'
   }
+
+  $tmpConcatFileName = '.powershell-google-tts-concat.txt';
+  if (Test-Path $tmpConcatFileName) {
+    Remove-Item $tmpConcatFileName;
+  }
   
   $text = $text.Replace('“', "").Replace('”', "");
   $data = [psobject]::new()
@@ -49,6 +54,8 @@ function Start-GoogleTTS ($text, $speed, $outFile, $voiceName) {
   $data | Add-Member -NotePropertyName 'audioConfig' -NotePropertyValue $audioConfig;
   $data | Add-Member -NotePropertyName 'input' -NotePropertyValue $inputParam;
   $data | Add-Member -NotePropertyName 'voice' -NotePropertyValue $voice;
+
+  # Google limits how large each request can be by text length.
   while ($i -lt $text.Length / 5000) {
     $chunk = '';
     while ($j -lt $parts.Length -and ($chunk.Length + $parts[$j].Length + 1) -lt 5000) {
@@ -79,19 +86,24 @@ function Start-GoogleTTS ($text, $speed, $outFile, $voiceName) {
     else {
         # add it to file for concatenation
         $outFiles.Add($writeFile);
-        "file '$writeFile'" | Out-File 'concat.txt' -Append -Encoding ascii;
+        "file '$writeFile'" | Out-File $tmpConcatFileName -Append -Encoding ascii;
     }
 
     $i++;
   }
 
   if (-not $useTemp) {
-    ffmpeg -f concat -safe 0 -i concat.txt -c copy $outFile
-    $outFiles | ForEach-Object {
-        Remove-Item $_ -Force
+    if ($outFiles.Count -gt 1) {
+      ffmpeg -f concat -safe 0 -i $tmpConcatFileName -c copy $outFile
+      $outFiles | ForEach-Object {
+          Remove-Item $_ -Force
+      }
+    } else {
+      Move-Item $outFiles[0] $outFile
     }
+    
 
-    Remove-Item concat.txt -Force
+    Remove-Item $tmpConcatFileName -Force
   }
 }
 
