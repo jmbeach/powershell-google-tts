@@ -45,7 +45,7 @@ function Start-GoogleTTS ($text, $speed, $outFile, $voiceName) {
   $j = 0;
   $parts = $text.Split(' ');
   $outFiles = [System.Collections.Generic.List[string]]::new();
-  $useTemp = $null -eq $outFile;
+  $deleteSpokenFile = $null -eq $outFile;
   $inputParam = [psobject]::new();
   $inputParam | Add-Member -NotePropertyName 'text' -NotePropertyValue $null;
   $voice = [psobject]::new();
@@ -74,12 +74,12 @@ function Start-GoogleTTS ($text, $speed, $outFile, $voiceName) {
 
     $tmpFile = "$tempPath/$([System.DateTime]::Now.ToSTring('yyyy-MM-dd-hh-mm-ss-ff')).mp3";
     $writeFile = "$outFile.$i";
-    if ($useTemp) {
+    if ($deleteSpokenFile) {
         $writeFile = $tmpFile;
     }
 
     [System.IO.File]::WriteAllBytes($writeFile, $base64);
-    if ($useTemp) {
+    if ($deleteSpokenFile) {
         ffplay -nodisp -autoexit -hide_banner -loglevel panic $writeFile > $null;
         Remove-Item $writeFile -Force;
     }
@@ -92,13 +92,16 @@ function Start-GoogleTTS ($text, $speed, $outFile, $voiceName) {
     $i++;
   }
 
-  if (-not $useTemp) {
+  # If the user wants to keep the audio output
+  if (-not $deleteSpokenFile) {
+    # concatenate it if it was large
     if ($outFiles.Count -gt 1) {
       ffmpeg -f concat -safe 0 -i $tmpConcatFileName -c copy $outFile
       $outFiles | ForEach-Object {
           Remove-Item $_ -Force
       }
     } else {
+      # otherwise just rename it from "<out-file>.0" to "<out-file>"
       Move-Item $outFiles[0] $outFile
     }
     
