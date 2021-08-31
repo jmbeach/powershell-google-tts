@@ -30,6 +30,7 @@ function Start-GoogleTTS ($text, $speed, $outFile, $voiceName) {
   }
   
   $text = $text.Replace('“', "").Replace('”', "");
+  $text = "$text";
   $data = [psobject]::new()
   $audioConfig = [psobject]::new();
   $audioConfig | Add-Member -NotePropertyName 'audioEncoding' -NotePropertyValue 'MP3';
